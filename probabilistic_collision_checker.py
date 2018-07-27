@@ -41,7 +41,7 @@ def cbPoly(polygon):
     last_position = Point32(centre[0], centre[1],0)
 def cbGrid(og):
     global restricted
-    restricted = ros2shapelyGrid(grid, last_position.x, last_position.y, 1)
+    restricted = ros2shapelyGrid(og, last_position.x, last_position.y, 26)
 def check(event):
     if last_position is None or restricted is None:
         print("still waiting for footprint and restriction map to become available")
@@ -52,13 +52,13 @@ def check(event):
             collision = True
     if collision:
         print("potential collision detected")
-        print(last_footprint)
-        print(restricted)
+        #print(last_footprint)
+        #print(restricted)
 last_footprint = None
 last_position = None
 restricted = None
 rospy.init_node("probabilistic_collision_checker")
 rospy.Subscriber("/uncertain_position", geometry_msgs.msg.PolygonStamped, cbPoly)
 rospy.Subscriber("/move_restrictions", OccupancyGrid, cbGrid)
-rospy.Timer(rospy.Duration(1), check)
+rospy.Timer(rospy.Duration(2), check)
 rospy.spin()

@@ -46,6 +46,6 @@ rospy.init_node("dev_node")
 ppub = rospy.Publisher("/uncertain_position", PolygonStamped, queue_size=5)
 rospy.Subscriber("/poseupdate_fixed", PoseWithCovarianceStamped, cbp)
 rospy.Subscriber("/slam_out_pose", PoseStamped, updatePose)
-rospy.Timer(rospy.Duration(0.2), pcb)
+rospy.Timer(rospy.Duration(0.1), pcb)
 rospy.spin()
 
