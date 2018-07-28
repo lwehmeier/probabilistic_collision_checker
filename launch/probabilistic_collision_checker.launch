@@ -1,7 +1,7 @@
 <!-- Starts up everything needed to run the example listener/talker Python nodes. -->
 
 <launch>
-  <node pkg="probabilistic_collision_checker" type="probabilistic_collision_checker.py" name="probabilistic_collision_checker">
+  <node pkg="probabilistic_collision_checker" type="probabilistic_collision_checker.py" name="probabilistic_collision_checker" output="screen">
     <param name="rate" value="5"/>
   </node>
   <node pkg="probabilistic_collision_checker" type="pose_update_scaler.py" name="pose_update_scaler">
