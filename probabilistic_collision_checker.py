@@ -2,10 +2,11 @@
 import rospy
 import geometry_msgs
 from geometry_msgs.msg import Point32
+from std_msgs.msg import Int16
 from nav_msgs.msg import OccupancyGrid
 import numpy as np
 from shapely.geometry import Polygon
-
+STOP_ROBOT_ON_AREA_CONSTRAINT_VIOLATION = True
 def ros2shapelyPolygon(polygon):
     points = []
     for point32 in polygon.polygon.points:
@@ -54,10 +55,13 @@ def check(event):
         print("potential collision detected")
         #print(last_footprint)
         #print(restricted)
+        if STOP_ROBOT_ON_AREA_CONSTRAINT_VIOLATION:
+            e_pub.publish(Int16(1))
 last_footprint = None
 last_position = None
 restricted = None
 rospy.init_node("probabilistic_collision_checker")
+epub = rospy.Publisher("/platform/e_stop", Int16, queue_size=1, tcp_nodelay=True)
 rospy.Subscriber("/uncertain_position", geometry_msgs.msg.PolygonStamped, cbPoly)
 rospy.Subscriber("/move_restrictions", OccupancyGrid, cbGrid)
 rospy.Timer(rospy.Duration(2), check)
