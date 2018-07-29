@@ -5,7 +5,7 @@ from geometry_msgs.msg import Quaternion, Polygon, PolygonStamped,Point32
 import tf
 from math import cos, sin
 import numpy as np
-DEBUG=True
+DEBUG=False
 BASE_LENGTH = 0.22
 BASE_WIDTH = 0.25
 N_SIGMA = 1.96
@@ -24,7 +24,7 @@ def pcb(event):
       cv[x].append(last_update.covariance[6*x+y])
   cv = np.array(cv)
   e = np.linalg.eigvals(cv)
-  e *= 0.1 #0.01
+  e *= 0.05 #0.01
   std = np.sqrt(e)
   #print(std)
   dx = BASE_LENGTH/2 + std[0] * N_SIGMA
