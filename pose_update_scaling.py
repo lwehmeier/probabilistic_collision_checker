@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 import rospy
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped, PoseWithCovariance
-from geometry_msgs.msg import Polygon, PolygonStamped,Point32
+from geometry_msgs.msg import Quaternion, Polygon, PolygonStamped,Point32
+import tf
+from math import cos, sin
 import numpy as np
-
+DEBUG=True
 BASE_LENGTH = 0.22
 BASE_WIDTH = 0.25
 N_SIGMA = 1.96
@@ -22,28 +24,55 @@ def pcb(event):
       cv[x].append(last_update.covariance[6*x+y])
   cv = np.array(cv)
   e = np.linalg.eigvals(cv)
-  e *= 0.01
+  e *= 0.1 #0.01
   std = np.sqrt(e)
-  print(std)
+  #print(std)
   dx = BASE_LENGTH/2 + std[0] * N_SIGMA
   dy = BASE_WIDTH/2 + std[1] * N_SIGMA
+  dth = std[2] * N_SIGMA 
+  quaternion = [0, 0, dth, 1.0]
+  deuler = tf.transformations.euler_from_quaternion(quaternion)
+  dyaw = deuler[2]
+  dth = dyaw
   p = PolygonStamped()
+  x = last_position.pose.position.x
+  y = last_position.pose.position.y
+  quaternion = [last_position.pose.orientation.x, last_position.pose.orientation.y, last_position.pose.orientation.z, last_position.pose.orientation.w]
+  euler = tf.transformations.euler_from_quaternion(quaternion)
+  yaw = euler[2]
+  th = yaw
+  #print((x, dx))
+  #print((y, dy))
+  #print((th, dth))
   points = [
-    Point32(last_position.pose.position.x - dx, last_position.pose.position.y - dy, 0),
-    Point32(last_position.pose.position.x - dx, last_position.pose.position.y + dy, 0),
-    Point32(last_position.pose.position.x + dx, last_position.pose.position.y + dy, 0),
-    Point32(last_position.pose.position.x + dx, last_position.pose.position.y - dy, 0)
+    Point32(x + (dx * cos(th-dth) - dy * sin(th-dth)),y + (dx * sin(th - dth) + dy*cos(th-dth)), 0),
+    Point32(x + (dx * cos(th) - dy * sin(th)),y + (dx * sin(th) + dy*cos(th)), 0),
+    Point32(x + (dx * cos(th+dth) - dy * sin(th+dth)),y + (dx * sin(th+ dth) + dy*cos(th+dth)), 0),
+    
+    Point32(x + (-dx * cos(th-dth) - dy * sin(th-dth)),y + (-dx * sin(th - dth) + dy*cos(th-dth)), 0),
+    Point32(x + (-dx * cos(th) - dy * sin(th)),y + (-dx * sin(th)+ dy*cos(th)), 0),
+    Point32(x + (-dx * cos(th+dth) - dy * sin(th+dth)),y + (-dx * sin(th + dth) + dy*cos(th+dth)), 0),
+
+    Point32(x + (-dx * cos(th-dth) + dy * sin(th-dth)),y + (-dx * sin(th - dth) - dy*cos(th-dth)), 0),
+    Point32(x + (-dx * cos(th)+ dy * sin(th)),y + (-dx * sin(th) - dy*cos(th)), 0),
+    Point32(x + (-dx * cos(th+dth) + dy * sin(th+dth)),y + (-dx * sin(th + dth) - dy*cos(th+dth)), 0),
+
+    Point32(x + (dx * cos(th-dth) + dy * sin(th-dth)),y + (dx * sin(th - dth) - dy*cos(th-dth)), 0),
+    Point32(x + (dx * cos(th) + dy * sin(th)),y + (dx * sin(th) - dy*cos(th)), 0),
+    Point32(x + (dx * cos(th+dth) + dy * sin(th+dth)),y + (dx * sin(th + dth) - dy*cos(th+dth)), 0)
     ]
   p.polygon.points = points
   p.header.stamp = rospy.Time.now()
   p.header.frame_id="map"
   ppub.publish(p)
-  print(p)
 
 last_update = PoseWithCovariance()
 last_position = PoseStamped()
 rospy.init_node("dev_node")
-ppub = rospy.Publisher("/uncertain_position", PolygonStamped, queue_size=5)
+if DEBUG:
+    ppub = rospy.Publisher("/uncertain_position_dbg", PolygonStamped, queue_size=5)
+else:
+    ppub = rospy.Publisher("/uncertain_position", PolygonStamped, queue_size=5)
 rospy.Subscriber("/poseupdate_fixed", PoseWithCovarianceStamped, cbp)
 rospy.Subscriber("/slam_out_pose", PoseStamped, updatePose)
 rospy.Timer(rospy.Duration(0.1), pcb)
