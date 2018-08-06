@@ -63,6 +63,6 @@ restricted = None
 rospy.init_node("probabilistic_collision_checker")
 epub = rospy.Publisher("/platform/e_stop", Int16, queue_size=1, tcp_nodelay=True)
 rospy.Subscriber("/uncertain_position", geometry_msgs.msg.PolygonStamped, cbPoly)
-rospy.Subscriber("/move_restrictions", OccupancyGrid, cbGrid)
+rospy.Subscriber("/restricted", OccupancyGrid, cbGrid)
 rospy.Timer(rospy.Duration(2), check)
 rospy.spin()

@@ -65,6 +65,16 @@ def pcb(event):
   p.header.stamp = rospy.Time.now()
   p.header.frame_id="map"
   ppub.publish(p)
+  ip = PolygonStamped()
+  ip.header.frame_id = "map"
+  ip.header.stamp = rospy.Time.now()
+  ip.polygon.points= [
+          Point32(x + (BASE_LENGTH/2 * cos(th) - BASE_WIDTH/2 * sin(th)),y + (BASE_LENGTH/2 * sin(th) + BASE_WIDTH/2*cos(th)), 0),
+          Point32(x + (-BASE_LENGTH/2 * cos(th) - BASE_WIDTH/2 * sin(th)),y + (-BASE_LENGTH/2 * sin(th)+ BASE_WIDTH/2*cos(th)), 0),
+          Point32(x + (-BASE_LENGTH/2 * cos(th)+ BASE_WIDTH/2 * sin(th)),y + (-BASE_LENGTH/2 * sin(th) - BASE_WIDTH/2*cos(th)), 0),
+          Point32(x + (BASE_LENGTH/2 * cos(th) + BASE_WIDTH/2 * sin(th)),y + (BASE_LENGTH/2 * sin(th) - BASE_WIDTH/2*cos(th)), 0)
+              ]
+  ipPub.publish(ip)
 
 last_update = PoseWithCovariance()
 last_position = PoseStamped()
@@ -73,6 +83,7 @@ if DEBUG:
     ppub = rospy.Publisher("/uncertain_position_dbg", PolygonStamped, queue_size=5)
 else:
     ppub = rospy.Publisher("/uncertain_position", PolygonStamped, queue_size=5)
+ipPub = rospy.Publisher("base_footprint", PolygonStamped, queue_size=3)
 rospy.Subscriber("/poseupdate_fixed", PoseWithCovarianceStamped, cbp)
 rospy.Subscriber("/slam_out_pose", PoseStamped, updatePose)
 rospy.Timer(rospy.Duration(0.1), pcb)

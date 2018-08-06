@@ -4,7 +4,7 @@
   <node pkg="probabilistic_collision_checker" type="probabilistic_collision_checker.py" name="probabilistic_collision_checker" output="screen">
     <param name="rate" value="5"/>
   </node>
-  <node pkg="probabilistic_collision_checker" type="pose_update_scaler.py" name="pose_update_scaler">
+  <node pkg="probabilistic_collision_checker" type="pose_update_scaling.py" name="pose_update_scaling">
     <param name="rate" value="5"/>
   </node>
 
