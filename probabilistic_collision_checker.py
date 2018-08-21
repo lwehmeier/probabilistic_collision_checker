@@ -56,7 +56,7 @@ def check(event):
         #print(last_footprint)
         #print(restricted)
         if STOP_ROBOT_ON_AREA_CONSTRAINT_VIOLATION:
-            e_pub.publish(Int16(1))
+            epub.publish(Int16(1))
 last_footprint = None
 last_position = None
 restricted = None
